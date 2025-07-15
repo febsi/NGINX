@@ -95,8 +95,27 @@ setalh itu baru buka ssh dengan port yang ditentukan.
 
 ![baru](Gambar/gambar14.png)
 
+kita buat ip addres kita tidak bisa di ping dari server lain.
+- buka file /etc/ufw/before.rules setelah itu tambah commandi pada bagian icmp INPUT dengan peintah.
 
+    ```bash
+    sudo nano /etc/ufw/before.rules
+    ```
+    
+    tambahkan
+    ```bash
+    -A ufw-before-input -p icmp --icmp-type echo-request -j DROP
+    ```
+    reload
+    ```bash
+    sudo ufw reload
+    ```
 
+    ping ip server linux dari server lain.
+    ![baru](Gambar/gambar15.png)
+
+akan tetapi saat server masih dapat melakukan ssh.
+![baru](Gambar/gambar16.png)
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
 
