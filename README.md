@@ -64,6 +64,38 @@ kita coba ssh dari komputer kita.
 
 ![baru](Gambar/gambar10.png)
 
+<h3>Ganti Port DEfault</h3>.
+
+1. buka file sshd_config dengan perintah.
+    ```bash
+    sudo nano /etc/ssh/sshd_config
+    ```
+    ubah configurasi sesuai dengan gambar dibawah
+![baru](Gambar/gambar11.png)
+
+
+2. Restart ssh server nya dengan perintah.
+    ```bash
+    sudo systemctl restart sshd
+    ```
+
+3. kita coba mengakses ssh nya dengan perintah yang sama.
+
+![baru](Gambar/gambar11.png)
+
+pasti tidak bisa sebab port yang kita gunakan sudah kita ganti.
+
+4. kita coba dengan dengan menambahkan port yang sudah kita masukan kedalam konfigurasi. sebelum itu pastikan firewall menngizinkan koneksi port yang diatur dengan perintah.
+    ```bash 
+    sudo ufw allow 717/tcp
+    ```
+![baru](Gambar/gambar13.png)
+
+setalh itu baru buka ssh dengan port yang ditentukan.
+
+![baru](Gambar/gambar14.png)
+
+
 
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
