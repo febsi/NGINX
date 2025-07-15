@@ -81,7 +81,7 @@ kita coba ssh dari komputer kita.
 
 3. kita coba mengakses ssh nya dengan perintah yang sama.
 
-![baru](Gambar/gambar11.png)
+![baru](Gambar/gambar12.png)
 
 pasti tidak bisa sebab port yang kita gunakan sudah kita ganti.
 
