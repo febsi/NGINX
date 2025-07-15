@@ -2,16 +2,11 @@
 
 Setup linux di Virtual Box.
 
-SSH pake passwordless, ganti port default, hardening, bila perlu coba test
+### SSH pake passwordless, ganti port default, hardening, bila perlu coba test
 
-1. Instal SSH pada linux.
-    ```bash
-    sudo apt update 
-    sudo apt install openssh-server
-    ```
-![baru](Gambar/gambar1.png)
+<h3>passwordless<h3>.
 
-2. kita membuat linux mengupdate secara otomatis.
+1. kita membuat linux mengupdate secara otomatis.
     ```bash
     sudo apt install unattended-upgardes
     ```
@@ -19,7 +14,7 @@ SSH pake passwordless, ganti port default, hardening, bila perlu coba test
 
 ![baru1](Gambar/gambar3.png)
 
-3. tambahkan user dan masukan user yang sudah dibuat ke dalam user sudo.
+2. tambahkan user dan masukan user yang sudah dibuat ke dalam user sudo.
 
 - tambah user.
     ```bash
@@ -58,6 +53,17 @@ SSH pake passwordless, ganti port default, hardening, bila perlu coba test
 ![baru](Gambar/gambar8.png)
 
 dapat kita lihat pada folder ~/.ssh sudah terdapr file id_rsa(privet key) dan id_rsa.pub(public key).
+
+- uplaoud file public key ke dalam linux server dengan perintah.
+    ```bash
+    scp $env:USERPROFILE/.ssh/id_rsa.pub <user@ip ubuntu>:~/ssh/authorized_keys
+    ```
+![baru](Gambar/gambar9.png)
+
+kita coba ssh dari komputer kita.
+
+![baru](Gambar/gambar10.png)
+
 
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
