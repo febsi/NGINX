@@ -2,7 +2,7 @@
 
 Setup linux di Virtual Box.
 
-### SSH pake passwordless, ganti port default, hardening, bila perlu coba test
+### SSH pake passwordless, ganti port default, hardening, bila perlu coba test dan tambahakan Fail2ban
 
 <h3>passwordless</h3>.
 
@@ -116,6 +116,71 @@ kita buat ip addres kita tidak bisa di ping dari server lain.
 
 akan tetapi saat server masih dapat melakukan ssh.
 ![baru](Gambar/gambar16.png)
+
+<h3>Fail2ban</h3>
+Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi sistem kita dari serangan brute-force. berikut cara pengunaan fail2ban di linux ubuntu.
+
+- instal fail2band dengan perintah.
+    ```bash 
+    sudo apt install fail2ban
+    ```
+
+- setelah itu jalankan fail2ban dan lihat statusnya dengan perintah.
+    ```bash
+    sudo systemctl start fail2ban
+    sudo systemctl status fail2ban
+    ```
+![baru](Gambar/gambar17.png)
+
+- setelah itu kita aktifkan fail2ban agar otomatis running meski sistem kita mengalami restart atau reboot.
+    ```bash
+    sudo systemctl enable fail2ban
+    ```
+
+- copy file jail.conf 
+    ```bash
+    sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+    ```
+
+- setelah itu kita configurasi pada jail.conf.
+    ```bash
+    sudo nano /etc/fail2ban/jail.local
+    ```
+
+    pada bagian ssh tambahkan command
+
+    ```bash
+    enable  = true // aktifkan fail2ban
+    findtime = 10m //waktu lama nya untuk melakukan login
+    maxretry = 4 //batas mencoba 
+    bandtime = 2h //waktu ban ip yang mencoba paksa masuk
+    ```
+- setelah itu kita uji konfigurasi fail2ban yang sudah kita buat falid atau tidak dengan perintah.
+    ```bash 
+    sudo fail2ban-client -d
+    ```
+
+- setelah itu kita restart fail2ban dan lihat status.
+    ```bash 
+    sudo systemctl restart fail2ban
+    sudo systemctl status fail2ban
+    ```
+![baru](Gambar/gambar18.png)
+
+- kita cek status status konfigurasi yang dikerjaan oleh fail2ban
+    ```bash
+    sudo fail2ban-client status
+    ```
+![baru](Gambar/gambar18.png)
+
+- kita lihat status sshd pada fail2ban.
+
+![baru](Gambar/gambar19.png)
+
+
+
+
+
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
 
