@@ -1,8 +1,6 @@
-# Nginx
+# Hrdering linux dan instal nginx denagn module brotil
 
-Setup linux di Virtual Box.
-
-### SSH pake passwordless, ganti port default, hardening, bila perlu coba test dan tambahakan Fail2ban
+### 1. SSH pake passwordless, ganti port default, hardening, bila perlu coba test dan tambahakan Fail2ban
 
 <h3>passwordless</h3>.
 
@@ -180,8 +178,8 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
 
 
 
-
+### 2. Install Nginx dengan module Brotil
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
 
- fasfasasfdasfa
+
