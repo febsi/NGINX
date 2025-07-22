@@ -269,17 +269,17 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
      cd /usr/local/nginx/html
      sudo nano index.html
     ```
- ![baru](Gambar/gambar21png)
+ ![baru](Gambar/gambar21.png)
 
 - verifikasi brotli.
     ```bash
      curl -H "Accept-Encoding: br" -I http://localhost
     ```
-    ![baru](Gambar/gambar21png) 
+    ![baru](Gambar/gambar.22png)
     brotli berhasil mengkompresi file html.
 
 - periksa ukuran file sebelum dan sesudah.
-    
+
 
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
