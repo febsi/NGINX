@@ -1,4 +1,4 @@
-# Hrdering linux dan instal nginx denagn module brotil
+# Hardering linux dan instal nginx denagn module brotil
 
 ### 1. SSH pake passwordless, ganti port default, hardening, bila perlu coba test dan tambahakan Fail2ban
 
@@ -179,6 +179,108 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
 
 
 ### 2. Install Nginx dengan module Brotil
+
+1. Update server kita dan install depedensi yang diperlukan.
+    ```bash
+    sudo apt update
+    sudo apt install -y build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev wget
+    ```
+
+2. unduh Source code nginx.
+    ```bash
+    wget https://nginx.org/download/nginx-1.25.3.tar.gz
+    ```
+
+3. ekstrak File Source Code
+    ```bash
+     tar -xvzf nginx-1.25.3.tar.gz
+     cd nginx-1.25.3
+    ```
+
+4. lakukan konfigurasi dan komplikasi.
+    ```bash
+      ./configure --prefix=/usr/local/nginx --with-http_ssl_modul --with-http_gzip_static_module
+    ```
+
+    kompilasi dan instal.
+    ```bash
+     make
+     sudomake install
+    ```
+
+5. tambahkan Nginx ke PATH
+    ```bash
+     echo 'export PATH=/usr/local/nginx/sbin:$PATH' >> ~/.bashrc
+     source ~/.bashrc
+    ```
+
+6. setelah itu cek konfigurasi.
+    ```bash
+     sudo nginx -t
+    ```
+
+7. menambahkan module brotil.
+    ```bash
+    sudo git clone https://github.com/google/ngx_brotli.git
+    cd ngx_brotli
+    sudo git submodule update --init
+    cd ..
+    ```
+
+8. konfigurasi ulang nginx dengan modul Brotli.
+    ```bash
+     ./configure --prefix=/usr/local/nginx -with-http_ssl_module -with-http_realip_module  --add-module=./ngx_brotli
+    ```
+
+9. kompilasi dan install.
+    ```bash
+     make 
+     sudo make install
+    ```
+
+10. konfigurasi nginx untuk menggunakan brotli.
+    ```bash
+    sudo nano /usr/local/nginx/conf/nginx.conf
+    ```
+
+    tambahkan konfigurasi berikut pada blok 'http'.
+    ```bash
+    brotli on;
+    brotli_comp_level 6; 
+    brotli_types text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+    ```
+
+11. restart nginx
+    ```bash
+    sudo nginx -s reload
+    ```
+
+12. verifikasi Brotli berhasil atau tidak.
+    ```bash
+    curl -H "Accept-Encoding: br" -I http://localhost
+    ```
+    ![baru](Gambar/gambar20.png)
+
+    pengujian brotli pada nginx.
+
+- buat direktori web.
+    ```bash
+     sudo mkdir -p /usr/local/nginx/html
+     cd /usr/local/nginx/html
+     sudo nano index.html
+    ```
+ ![baru](Gambar/gambar21png)
+
+- verifikasi brotli.
+    ```bash
+     curl -H "Accept-Encoding: br" -I http://localhost
+    ```
+    ![baru](Gambar/gambar21png) 
+    brotli berhasil mengkompresi file html.
+
+- periksa ukuran file sebelum dan sesudah.
+    
+
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
 
