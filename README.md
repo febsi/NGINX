@@ -7,60 +7,52 @@
 1. kita membuat linux mengupdate secara otomatis.
     ```bash
     sudo apt install unattended-upgardes
+    sudo dpkg-reconfigure --priority=low unattended-upgardes
     ```
-![baru1](Gambar/gambar2.png)
-
-![baru1](Gambar/gambar3.png)
 
 2. tambahkan user dan masukan user yang sudah dibuat ke dalam user sudo.
 
-- tambah user.
+    - tambah user.
     ```bash
     sudo adduser <user>
     ```
-![baru1](Gambar/gambar4.png)
-    
-- masukan user ke user sudo.
+
+    - masukan user ke user sudo.
     ```bash
-    sudo usermod -aG sudo febri
+    sudo usermod -aG sudo <user>
     ```
 
-![baru](Gambar/gambar5.png)
-
-- tukar user.
+    - tukar user.
     ```bash
     sudo su - febri
     ```
 
 3. Setalh itu kita buat posswordless agar saat kita melakukan ssh dari kompuer yang lain kita hanya tinggal memasukan user dan ip linux tanpa perlu memasukan password saat melakukan ssh.
 
-- kita masuk ke file ~/.ssh pada linux dan kita masukan izin 700 dimana cuman hanya pemilik direktori yang dapat mengaksesnya.
+    - kita masuk ke file ~/.ssh pada linux dan kita masukan izin 700 dimana cuman hanya pemilik direktori yang dapat mengaksesnya.
     ```bash
-    sudo chmod 700 ~/.ssh
+     cd ~/.ssh
+     sudo chmod 700 ~/.ssh
     ```
-![baru](Gambar/gambar6.png)
 
-- setelah itu kita create publik/privet key pada komputer yang ingin mengakses linux server kita dengan ssh dengan perintah.
+    - setelah itu kita create publik/privet key pada komputer yang ingin mengakses linux server kita dengan ssh dengan perintah.
     ```bash
     ssh-keygen -b 4096
     ```
+    Dapat kita lihat bahwa public key dan privet key sudah dibuat.
+    ![baru](Gambar/gambar8.png)
 
-![baru](Gambar/gambar7.png)
+    dapat kita lihat pada folder ~/.ssh sudah terdapr file id_rsa(privet key) dan id_rsa.pub(public key).
 
- Dapat kita lihat hasinya di gambar ini.
-![baru](Gambar/gambar8.png)
-
-dapat kita lihat pada folder ~/.ssh sudah terdapr file id_rsa(privet key) dan id_rsa.pub(public key).
-
-- uplaoud file public key ke dalam linux server dengan perintah.
+    - uplaoud file public key ke dalam linux server dengan perintah.
     ```bash
     scp $env:USERPROFILE/.ssh/id_rsa.pub <user@ip ubuntu>:~/ssh/authorized_keys
     ```
-![baru](Gambar/gambar9.png)
+    ![baru](Gambar/gambar9.png)
 
-kita coba ssh dari komputer kita.
+    kita coba ssh dari komputer kita.
 
-![baru](Gambar/gambar10.png)
+    ![baru](Gambar/gambar10.png)
 
 ### Ganti Port DEfault.
 
@@ -84,6 +76,7 @@ kita coba ssh dari komputer kita.
 pasti tidak bisa sebab port yang kita gunakan sudah kita ganti.
 
 4. kita coba dengan dengan menambahkan port yang sudah kita masukan kedalam konfigurasi. sebelum itu pastikan firewall menngizinkan koneksi port yang diatur dengan perintah.
+
     ```bash 
     sudo ufw allow 717/tcp
     ```
@@ -93,7 +86,10 @@ setalh itu baru buka ssh dengan port yang ditentukan.
 
 ![baru](Gambar/gambar14.png)
 
-kita buat ip addres kita tidak bisa di ping dari server lain.
+### PING server
+
+kita buat ip addres kita tidak bisa di ping agar server ip kita tidak terdeteksi dari server lain.
+
 - buka file /etc/ufw/before.rules setelah itu tambah commandi pada bagian icmp INPUT dengan peintah.
 
     ```bash
@@ -112,8 +108,8 @@ kita buat ip addres kita tidak bisa di ping dari server lain.
     ping ip server linux dari server lain.
     ![baru](Gambar/gambar15.png)
 
-akan tetapi saat server masih dapat melakukan ssh.
-![baru](Gambar/gambar16.png)
+    akan tetapi saat server masih dapat melakukan ssh.
+    ![baru](Gambar/gambar16.png)
 
 ### Fail2ban
 Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi sistem kita dari serangan brute-force. berikut cara pengunaan fail2ban di linux ubuntu.
@@ -128,7 +124,7 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
     sudo systemctl start fail2ban
     sudo systemctl status fail2ban
     ```
-![baru](Gambar/gambar17.png)
+    ![baru](Gambar/gambar17.png)
 
 - setelah itu kita aktifkan fail2ban agar otomatis running meski sistem kita mengalami restart atau reboot.
     ```bash
@@ -153,7 +149,7 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
     maxretry = 4 //batas mencoba 
     bandtime = 2h //waktu ban ip yang mencoba paksa masuk
     ```
-- setelah itu kita uji konfigurasi fail2ban yang sudah kita buat falid atau tidak dengan perintah.
+- setelah itu kita uji konfigurasi fail2ban yang sudah di buat valid atau tidak dengan perintah.
     ```bash 
     sudo fail2ban-client -d
     ```
@@ -176,7 +172,7 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
 ![baru](Gambar/gambar19.png)
 
 
-kita coba fail2ban pada sshd yang sudah kita atur.
+kita coba fail2ban pada sshd yang sudah kita atur. Dengan cara memasukan user yang salah tapi dengan ip dan port yang sama.
 ![baru](Gambar/gambar25.png)
 
 kita lihat statsu fail2ban.
