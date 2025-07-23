@@ -176,6 +176,11 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
 ![baru](Gambar/gambar19.png)
 
 
+kita coba fail2ban pada sshd yang sudah kita atur.
+![baru](Gambar/gambar25.png)
+
+kita lihat statsu fail2ban.
+![baru](Gambar/gambar26.png)
 
 
 ## 2. Install Nginx dengan module Brotil
