@@ -1,8 +1,8 @@
 # Hardering linux dan instal nginx denagn module brotil
 
-### 1. SSH pake passwordless, ganti port default, hardening, bila perlu coba test dan tambahakan Fail2ban
+## 1. SSH pake passwordless, ganti port default, hardening, bila perlu coba test dan tambahakan Fail2ban
 
-<h3>passwordless</h3>.
+### passwordless.
 
 1. kita membuat linux mengupdate secara otomatis.
     ```bash
@@ -62,7 +62,7 @@ kita coba ssh dari komputer kita.
 
 ![baru](Gambar/gambar10.png)
 
-<h3>Ganti Port DEfault</h3>.
+### Ganti Port DEfault.
 
 1. buka file sshd_config dengan perintah.
     ```bash
@@ -115,7 +115,7 @@ kita buat ip addres kita tidak bisa di ping dari server lain.
 akan tetapi saat server masih dapat melakukan ssh.
 ![baru](Gambar/gambar16.png)
 
-<h3>Fail2ban</h3>
+### Fail2ban
 Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi sistem kita dari serangan brute-force. berikut cara pengunaan fail2ban di linux ubuntu.
 
 - instal fail2band dengan perintah.
@@ -178,7 +178,7 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
 
 
 
-### 2. Install Nginx dengan module Brotil
+## 2. Install Nginx dengan module Brotil
 
 1. Update server kita dan install depedensi yang diperlukan.
     ```bash
@@ -275,12 +275,84 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
     ```bash
      curl -H "Accept-Encoding: br" -I http://localhost
     ```
-    ![baru](Gambar/gambar.22png)
+    ![baru](Gambar/gambar22.png)
     brotli berhasil mengkompresi file html.
 
-- periksa ukuran file sebelum dan sesudah.
+## 3 buat ssl certificate dengan self signed.
+
+- kita buat SSL directory.
+    ```bash
+     cd /usr/local/nginx
+     sudo mkdir SSL
+    ```
+
+- buat file infoemasi tentang SSL
+    ```bash
+     sudo nano self-info.txt
+     [req]
+     default_bits       = 2048
+     prompt      = no
+     default_keyfile    = localhost.key
+     distinguished_name = dn
+     req_extensions     = req_ext
+     x509_extensions    = v3_ca
+
+     [ dn ]
+     C = PH
+     ST = NCR
+     L = Manila
+     O = localhost
+     OU = Development
+     CN = localhost
+
+     [req_ext]
+     subjectAltName = @alt_names
+
+     [v3_ca]
+     subjectAltName = @alt_names
+
+     [alt_names]
+     DNS.1   = localhost
+     DNS.2   = 127.0.0.1
+    ```
+
+- jalankan petintah OpenSSl.
+    ```bash 
+     sudo openssl req -x509 -nodes -days 3652 -new key rsa:2048 -keyout localhost.key -out localhost.crt -config ssl-info.txt
+    ```
+
+    cek direktori ssl.
+    ![baru](Gambar/gambar23.png)
 
 
+- buka konfigurasi nginx dan tambahkan printah beriku pada bagian server.
+    ```bash
+     sudo nano /usr/local/nginx/conf/nginx.conf
+
+     listen 443 ssl;
+     listen [::]:443 ssl;
+
+     ssl_certificate /usr/local/nginx/ssl/localhost.crt;
+     ssl_certificate_key /usr/local/nginx/ssl/localhost.key;
+
+     ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
+     ```
+
+- kita izinkan port 80 dan 443 melalui firewall agar dapat diakses oleh  server.
+    ```bash
+     sudo ufw allow 80
+     sudo ufw allow 443
+    ```
+
+- setelah itu restar nginx dengan perintah.
+    ```bash
+     sudo systemctl reload nginx
+    ```
+
+- kita lihat tampilan web yang sudah kita buat.
+    ![baru](Gambar/gambar24.png)
+
+    dapat kita lihat bahwa ssl berhasil kita tambahkan.
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
 
