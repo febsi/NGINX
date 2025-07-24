@@ -40,7 +40,7 @@
     ssh-keygen -b 4096
     ```
     Dapat kita lihat bahwa public key dan privet key sudah dibuat.
-    ![baru](Gambar/gambar8.png)
+    ![baru](Gambar/gambar1.png)
 
     dapat kita lihat pada folder ~/.ssh sudah terdapr file id_rsa(privet key) dan id_rsa.pub(public key).
 
@@ -48,11 +48,11 @@
     ```bash
     scp $env:USERPROFILE/.ssh/id_rsa.pub <user@ip ubuntu>:~/ssh/authorized_keys
     ```
-    ![baru](Gambar/gambar9.png)
+    ![baru](Gambar/gambar2.png)
 
     kita coba ssh dari komputer kita.
 
-    ![baru](Gambar/gambar10.png)
+    ![baru](Gambar/gambar3.png)
 
 ### Ganti Port DEfault.
 
@@ -61,7 +61,7 @@
     sudo nano /etc/ssh/sshd_config
     ```
     ubah configurasi sesuai dengan gambar dibawah
-![baru](Gambar/gambar11.png)
+![baru](Gambar/gambar4.png)
 
 
 2. Restart ssh server nya dengan perintah.
@@ -71,7 +71,7 @@
 
 3. kita coba mengakses ssh nya dengan perintah yang sama.
 
-![baru](Gambar/gambar12.png)
+![baru](Gambar/gambar5.png)
 
 pasti tidak bisa sebab port yang kita gunakan sudah kita ganti.
 
@@ -80,11 +80,11 @@ pasti tidak bisa sebab port yang kita gunakan sudah kita ganti.
     ```bash 
     sudo ufw allow 717/tcp
     ```
-![baru](Gambar/gambar13.png)
+![baru](Gambar/gambar6.png)
 
 setalh itu baru buka ssh dengan port yang ditentukan.
 
-![baru](Gambar/gambar14.png)
+![baru](Gambar/gambar7.png)
 
 ### PING server
 
@@ -106,10 +106,10 @@ kita buat ip addres kita tidak bisa di ping agar server ip kita tidak terdeteksi
     ```
 
     ping ip server linux dari server lain.
-    ![baru](Gambar/gambar15.png)
+    ![baru](Gambar/gambar8.png)
 
     akan tetapi saat server masih dapat melakukan ssh.
-    ![baru](Gambar/gambar16.png)
+    ![baru](Gambar/gambar9.png)
 
 ### Fail2ban
 Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi sistem kita dari serangan brute-force. berikut cara pengunaan fail2ban di linux ubuntu.
@@ -124,7 +124,7 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
     sudo systemctl start fail2ban
     sudo systemctl status fail2ban
     ```
-    ![baru](Gambar/gambar17.png)
+    ![baru](Gambar/gambar10.png)
 
 - setelah itu kita aktifkan fail2ban agar otomatis running meski sistem kita mengalami restart atau reboot.
     ```bash
@@ -159,24 +159,19 @@ Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi siste
     sudo systemctl restart fail2ban
     sudo systemctl status fail2ban
     ```
-![baru](Gambar/gambar18.png)
+![baru](Gambar/gambar11.png)
 
 - kita cek status status konfigurasi yang dikerjaan oleh fail2ban
     ```bash
     sudo fail2ban-client status
     ```
-![baru](Gambar/gambar18.png)
-
-- kita lihat status sshd pada fail2ban.
-
-![baru](Gambar/gambar19.png)
-
+![baru](Gambar/gambar12.png)
 
 kita coba fail2ban pada sshd yang sudah kita atur. Dengan cara memasukan user yang salah tapi dengan ip dan port yang sama.
-![baru](Gambar/gambar25.png)
+![baru](Gambar/gambar13.png)
 
 kita lihat statsu fail2ban.
-![baru](Gambar/gambar26.png)
+![baru](Gambar/gambar14.png)
 
 
 ## 2. Install Nginx dengan module Brotil
@@ -260,7 +255,7 @@ kita lihat statsu fail2ban.
     ```bash
     curl -H "Accept-Encoding: br" -I http://localhost
     ```
-    ![baru](Gambar/gambar20.png)
+    ![baru](Gambar/gambar15.png)
 
     pengujian brotli pada nginx.
 
@@ -270,13 +265,13 @@ kita lihat statsu fail2ban.
      cd /usr/local/nginx/html
      sudo nano index.html
     ```
- ![baru](Gambar/gambar21.png)
+ ![baru](Gambar/gambar16.png)
 
 - verifikasi brotli.
     ```bash
      curl -H "Accept-Encoding: br" -I http://localhost
     ```
-    ![baru](Gambar/gambar22.png)
+    ![baru](Gambar/gambar17.png)
     brotli berhasil mengkompresi file html.
 
 ## 3 buat ssl certificate dengan self signed.
@@ -323,7 +318,7 @@ kita lihat statsu fail2ban.
     ```
 
     cek direktori ssl.
-    ![baru](Gambar/gambar23.png)
+    ![baru](Gambar/gambar18.png)
 
 
 - buka konfigurasi nginx dan tambahkan printah beriku pada bagian server.
@@ -351,9 +346,45 @@ kita lihat statsu fail2ban.
     ```
 
 - kita lihat tampilan web yang sudah kita buat.
-    ![baru](Gambar/gambar24.png)
+    ![baru](Gambar/gambar19.png)
 
     dapat kita lihat bahwa ssl berhasil kita tambahkan.
+
+## 4. Coba Load Testing dengan tool K6
+
+- Update server danInstal K6 dengan perintah 
+    ```bash
+     sudo apt update
+     sudo apt install k6
+    ```
+
+- buat direktori k6 dan buat file baru untuk konfigurasi k6.
+    ```bash
+     mkdir k6
+     sudo nano <nama_file>.js
+     ```
+
+- kita run file k6 yang sudah kita buat dengan perintah.
+    ```bash
+     k6 run <nama_file>.js
+    ```
+    ![baru](Gambar/gambar20.png)
+
+kita coba web yang sudah kita buat dengam 100 virtual user yang masuk ke web kita dengan duration 40 detik dan kita lihat usage pada server kita dengan perintah.
+    ```bash 
+    k6 run --vus 100 --duration 40s main.js
+    ```
+
+![baru](Gambar/gambar21.png)
+
+dapat kita lihat usage resorce yang terjadi saat load testing yang dilakukan k6.
+![baru](Gambar/gambar22.png)
+
+inilah hasil dari log load test dari k6.
+![baru](Gambar/gambar23.png)
+
+
+
 
 3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
 
