@@ -1,8 +1,12 @@
-# Hardering linux dan instal nginx denagn module brotil
+# Optimasi dan Keamanan Server Nginx di Linux: Dari Hardening hingga Load Testing
 
-## 1. SSH pake passwordless, ganti port default, hardening, bila perlu coba test dan tambahakan Fail2ban
+keamanan dan kinerja server web sangat penting untuk menjaga integritas dan ketersediaan layanan. Proyek ini bertujuan untuk mengoptimalkan dan mengamankan server Nginx yang berjalan di sistem operasi Linux melalui serangkaian langkah yang mencakup hardening, instalasi Nginx dengan modul Brotli, pembuatan sertifikat SSL, dan pengujian beban menggunakan alat k6.
+ 
+### 1. Hardening linux
 
-### passwordless.
+Hardening Linux adalah proses meningkatkan keamanan sistem operasi Linux dengan mengurangi potensi kerentanan dan mengamankan konfigurasi sistem. Dalam bagian ini, kita akan membahas langkah-langkah yang diambil untuk mengamankan server Linux, termasuk pengaturan SSH, pengelolaan pengguna, dan perlindungan terhadap serangan brute-force. Hardering yang saya lakuakn saya lakuakn adalah Passwodless, Ganti port Default untuk ssh, menonaktifkan PING, dan menggunakan Fail2ban.  
+
+#### passwordless.
 
 1. kita membuat linux mengupdate secara otomatis.
     ```bash
@@ -54,7 +58,7 @@
 
     ![baru](Gambar/gambar3.png)
 
-### Ganti Port DEfault.
+#### Ganti Port DEfault.
 
 1. buka file sshd_config dengan perintah.
     ```bash
@@ -86,7 +90,7 @@ setalh itu baru buka ssh dengan port yang ditentukan.
 
 ![baru](Gambar/gambar7.png)
 
-### PING server
+#### PING server
 
 kita buat ip addres kita tidak bisa di ping agar server ip kita tidak terdeteksi dari server lain.
 
@@ -111,7 +115,7 @@ kita buat ip addres kita tidak bisa di ping agar server ip kita tidak terdeteksi
     akan tetapi saat server masih dapat melakukan ssh.
     ![baru](Gambar/gambar9.png)
 
-### Fail2ban
+#### Fail2ban
 Fail 2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi sistem kita dari serangan brute-force. berikut cara pengunaan fail2ban di linux ubuntu.
 
 - instal fail2band dengan perintah.
@@ -174,7 +178,9 @@ kita lihat statsu fail2ban.
 ![baru](Gambar/gambar14.png)
 
 
-## 2. Install Nginx dengan module Brotil
+### 2. Install Nginx dengan module Brotil
+
+Nginx adalah server web yang populer dan efisien. Dalam bagian ini, kita menginstal Nginx dan menambahkan modul Brotli untuk meningkatkan kompresi konten, yang dapat mempercepat waktu muat halaman dan mengurangi penggunaan bandwidth. Proses ini mencakup pengunduhan, kompilasi, dan konfigurasi Nginx untuk memanfaatkan modul Brotli.
 
 1. Update server kita dan install depedensi yang diperlukan.
     ```bash
@@ -274,7 +280,9 @@ kita lihat statsu fail2ban.
     ![baru](Gambar/gambar17.png)
     brotli berhasil mengkompresi file html.
 
-## 3 buat ssl certificate dengan self signed.
+### 3 buat ssl certificate dengan self signed.
+
+Keamanan data yang ditransmisikan antara server dan klien sangat penting. Dengan membuat sertifikat SSL self-signed, kita dapat mengenkripsi komunikasi dan melindungi informasi sensitif. Konfigurasi SSL di Nginx memastikan bahwa semua data yang dikirimkan aman dan terlindungi dari penyadapan.
 
 - kita buat SSL directory.
     ```bash
@@ -350,7 +358,9 @@ kita lihat statsu fail2ban.
 
     dapat kita lihat bahwa ssl berhasil kita tambahkan.
 
-## 4. Coba Load Testing dengan tool K6
+### 4. Load Testing dengan K6
+
+Setelah server dikonfigurasi dan dioptimalkan, penting untuk menguji kinerjanya di bawah beban. Dengan menggunakan alat k6, kita dapat mensimulasikan banyak pengguna virtual yang mengakses server secara bersamaan. Pengujian ini membantu kita memahami bagaimana server menangani permintaan tinggi dan mengidentifikasi potensi masalah kinerja.
 
 - Update server danInstal K6 dengan perintah 
     ```bash
@@ -383,9 +393,5 @@ dapat kita lihat usage resorce yang terjadi saat load testing yang dilakukan k6.
 inilah hasil dari log load test dari k6.
 ![baru](Gambar/gambar23.png)
 
-
-
-
-3. Instal Nginx sama module brotil(compile buka pake apt), terus coba test setup simple aplikasi, terus buat ssl certs nya pake yang self-signed juga gpp, terus kalau udah nanti coba load test pake k6s atau locus, atau apalah bebas buat mastiin konfigurasi mu udah ok atau blm, pastiin config nginx nya  juga udah well-turned.
 
 
