@@ -1,0 +1,45 @@
+---
+- name: setuo nftables
+  hosts: all
+  become: true
+
+  tasks:
+    - name: install nftables
+      ansible.builtin.apt:
+        name: nftables
+        state: present
+
+    - name: start nftables
+      ansible.builtin.systemd:
+        name: nftables
+        state: started
+        enabled: true
+
+    - name: konfigurasi port 22, 80, 443
+      ansible.builtin.copy:
+        dest: /etc/nftables.conf
+        content: |
+          #!/usr/sbin/nft -f
+
+          flush ruleset
+
+          table inet filter {
+              chain input {
+                type filter hook input priority 0;
+
+                tcp dport 22 accept
+
+                tcp dport 80 accept
+
+                tcp dport 443 accept
+              }
+              chain forward {
+              type filter hook forward priority 0;
+              }
+              chain output {
+                type filter hook output priority 0;
+              }
+          }
+
+    - name: reload nftables and enable
+      ansible.builtin.command: nft -f /etc/nftables.conf

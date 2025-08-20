@@ -1,0 +1,170 @@
+- name: Install Nginx dengan Brotli Module
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install required dependencies
+      ansible.builtin.apt:
+        name:
+          - dpkg-dev
+          - git
+          - build-essential
+          - gnupg2
+          - gcc
+          - cmake
+          - libpcre3
+          - libpcre3-dev
+          - zlib1g
+          - zlib1g-dev
+          - libssl-dev
+          - openssl
+          - curl
+          - unzip
+          - libbrotli-dev
+        state: present
+        update_cache: yes
+
+    - name: Tambahkan Nginx GPG key
+      ansible.builtin.get_url:
+        url: https://nginx.org/keys/nginx_signing.key
+        dest: /etc/apt/trusted.gpg.d/nginx_signing.asc
+        mode: '0644'
+
+    - name: Tambahkan Repository Nginx
+      ansible.builtin.apt_repository:
+        repo: "deb http://nginx.org/packages/ubuntu noble nginx"
+        state: present
+        filename: "nginx"
+
+    - name: Tambahkan Repository Source Nginx
+      ansible.builtin.apt_repository:
+        repo: "deb-src http://nginx.org/packages/ubuntu noble nginx"
+        state: present
+        filename: "nginx"
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: ambil source
+      ansible.builtin.shell: apt-get source nginx
+      args:
+        chdir: /usr/local/src
+
+    - name: install depedenci brotli
+      ansible.builtin.apt:
+        pkg: "{{ item }}"
+        state: present
+      loop:
+        - dpkg-dev
+        - build-essential
+
+
+    - name: clone ngx_brotli
+      ansible.builtin.git:
+        repo: https://github.com/google/ngx_brotli.git
+        dest: /usr/local/src/ngx_brotli
+        recursive: yes
+
+    - name: Tambahkan --add-module ke configure nginx
+      ansible.builtin.replace:
+      path: /usr/local/src/nginx-1.28.0/debian/rules
+        regexp: 'CFLAGS="" ./configure'
+        replace: 'CFLAGS="" ./configure --add-module=/usr/local/src/ngx_brotli'
+
+    - name: Tambahkan module Brotli ke config.status.nginx_debug
+      ansible.builtin.replace:
+        path: /usr/local/src/nginx-1.28.0/debian/rules
+        regexp: 'cd \$(BUILDDIR_nginx_debug) && \\s*CFLAGS="" ./configure'
+        replace: 'cd $(BUILDDIR_nginx_debug) && CFLAGS="" ./configure --add-module=>
+    
+    - name: Install build dependencies for nginx
+      ansible.builtin.shell: |
+        apt-get update
+        apt-get build-dep -y nginx || true
+        apt-get install -y debhelper quilt libpcre2-dev
+
+    - name: Compile Nginx dengan Brotli
+      ansible.builtin.shell: dpkg-buildpackage -b -uc -us
+      args:
+        chdir: /usr/local/src/nginx-1.28.0
+
+    - name: Install nginx hasil build
+      ansible.builtin.shell: dpkg -i /usr/local/src/*.deb
+
+    - name: Tambahkan konfigurasi Brotli ke nginx.conf
+      ansible.builtin.blockinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: 'http {'
+        block: |
+          brotli on;
+          brotli_comp_level 6;
+          brotli_static on;
+          brotli_types text/plain text/css application/javascript application/x-jav>
+    - name: Generate private key
+      community.crypto.openssl_privatekey:
+      path: /etc/ssl/private/nginx-selfsigned.key
+        size: 2048
+
+    - name: Generate self-signed certificate
+      community.crypto.x509_certificate:
+        path: /etc/ssl/certs/nginx-selfsigned.crt
+        privatekey_path: /etc/ssl/private/nginx-selfsigned.key
+        provider: selfsigned
+        selfsigned_not_after: "+365d"
+
+    - name: Buat konfigurasi HTTPS default
+      ansible.builtin.copy:
+        dest: /etc/nginx/conf.d/default.conf
+        content: |
+          server {
+              listen       80;
+              listen       [::]:80;
+              server_name  _;
+              root         /usr/share/nginx/html;
+
+              index index.html index.htm;
+
+              location / {
+              try_files $uri $uri/ =404;
+          }
+          }
+          server {
+              listen 443 ssl;
+              server_name localhost;
+
+              ssl_certificate /etc/ssl/certs/localhost.crt;
+              ssl_certificate_key /etc/ssl/private/localhost.key;
+
+              root /usr/share/nginx/html;
+              index feb.html;
+          }
+
+
+    - name: Test konfigurasi nginx
+      ansible.builtin.command: nginx -t
+      register: nginx_test
+      ignore_errors: yes
+
+    - name: Tampilkan hasil test nginx
+      ansible.builtin.debug:
+        var: nginx_test.stdout
+
+    - name: Start & Enable Nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Reload Nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+
+    - name: Cek Brotli dengan curl
+      ansible.builtin.command: "curl -k -H 'Accept-Encoding: br' -I https://localho>      register: curl_result
+      ignore_errors: yes
+
+    - name: Tampilkan hasil curl
+      ansible.builtin.debug:
+        var: curl_result.stdout
