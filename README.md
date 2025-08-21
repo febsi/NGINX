@@ -94,32 +94,75 @@ Setalh itu baru buka ssh dengan port yang ditentukan.
 
 ![baru](Gambar/gambar7.png)
 
-#### c. PING server
+#### c. nftables
+nftables adalah framework atau sistem firewall yang moderen di linux. dengan ini kita bisa mengatur aturan untuk memfilter, memodifikasi, dan memantau paket jaringan dengan cara yang lebih sederhana dan konsisten dan efisien.
 
-Kita buat ip addres kita tidak bisa di ping agar server ip kita tidak terdeteksi dari server lain.
+kita gunakan nftables untuk alran port yang akan kita izinkan seperti , port 80 (untuk nginx) ,port 443 (untuk ssl) dan port 717 (untuk ssh). yang dikerjakan disini cukan drop dan accept portnya.
 
-- Buka file /etc/ufw/before.rules setelah itu tambah commandi pada bagian icmp INPUT dengan peintah.
+alur kerjanya:
+- paket data masuk ke interface jaringan server kita.
+- paket melewati hook tertentu di kernel, mis:
+    - input -> paket masuk ke host lokal
+    - forward -> paket diteruskan ke jaringanlain
+    - output -> paket keluar dari host
+- nftable menggunak tabel dan chain:
+    - table -> kumpulan aturan (mis filter, nat)
+    - chain -> jalur logika di dalam table (mis. input, forward, output)
+- paket dibandingkan dengan aturan rules di chain:
+    - accept (port memberikan izin untuk di lalui)
+    - drop (port tidak dikasih izin diakses)
+- karnel mengeksekusi aksi yang ditentukan oleh rule
+- paket diteruskan atau dikirim sesuai hasil aturan yang berlaku.
+
+untuk menggunakan nftables dapat kita lakukan langkah berikut.
+
+- install nftables:
+    ```bash
+    sudo install apt nftables 
+    ```
+
+- enable atau start nftables:
+    ```bash
+    sudo systemctl start nftables
+    ```
+
+- tambahkan command line pada file /etc/nftables.conf:
 
     ```bash
-    sudo nano /etc/ufw/before.rules
+    #!/usr/sbin/nft -f
+
+    flush ruleset
+
+    table inet filter {
+        chain input {
+            type filter hook input priority 0;
+
+            tcp dport 80 accept
+
+            tcp dport 443 accept
+
+            tcp dport 717 accept
+        
+        }
+        chain forward {
+                type filter hook forward priority 0;
+        }
+        chain output {
+                type filter hook output priority 0;
+        }
+        }
     ```
+- reload nftables: 
     
-    Tambahkan
     ```bash
-    -A ufw-before-input -p icmp --icmp-type echo-request -j DROP
-    ```
-    Reload Firewall
-    ```bash
-    sudo ufw reload
+    sudo nft -f /etc/nftables.conf
     ```
 
-    ping ip server linux dari server lain.
-    
-    ![baru](Gambar/gambar8.png)
+- cek nftables yang sudah dibuat:
 
-    Akan tetapi saat server masih dapat melakukan ssh.
-    
-    ![baru](Gambar/gambar9.png)
+    ```bash
+    sudo nft list ruleset
+    ```
 
 #### d. Fail2ban
 Fail2ban adalah software yang menggunakan bahasa  pyhton untuk melindungi sistem kita dari serangan brute-force. berikut cara pengunaan fail2ban di linux ubuntu.
@@ -191,82 +234,155 @@ Lihat statsu fail2ban.
 
 Nginx adalah server web yang populer dan efisien. Dalam bagian ini, kita menginstal Nginx dan menambahkan modul Brotli untuk meningkatkan kompresi konten, yang dapat mempercepat waktu muat halaman dan mengurangi penggunaan bandwidth. Proses ini mencakup pengunduhan, kompilasi, dan konfigurasi Nginx untuk memanfaatkan modul Brotli.
 
-1. Update server kita dan install depedensi yang diperlukan.
+1. Install Dependencies"
+
     ```bash
-    sudo apt update
-    sudo apt install -y build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev wget
+    sudo apt-get install dpkg-dev build-essential gnupg2 git gcc cmake libpcre3 libpcre3-dev zlib1g zlib1g-dev openssl libssl-dev curl unzip libbrotli-dev -y
     ```
 
-2. Unduh Source code nginx.
+2. tambahkan Reposittory Nginx
+
     ```bash
-    wget https://nginx.org/download/nginx-1.25.3.tar.gz
+    sudo curl -L https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
     ```
 
-3. Ekstrak File Source Code
+    buat file /etc/apt/sources.list.d/nginx.list:
+
     ```bash
-     tar -xvzf nginx-1.25.3.tar.gz
-     cd nginx-1.25.3
+    deb http://nginx.org/packages/ubuntu/ noble nginx
+    deb-src http://nginx.org/packages/ubuntu/ noble nginx
     ```
 
-4. Lakukan konfigurasi dan komplikasi.
-    ```bash
-      ./configure --prefix=/usr/local/nginx --with-http_ssl_modul --with-http_gzip_static_module
+    lalu update repository nya:
+
+    ``bash 
+    sudo apt-get update -y
     ```
 
-    Kompilasi dan instal.
+3. persiapkan module brotli:
+
     ```bash
-     make
-     sudomake install
+    cd /usr/local/src
+    sudo apt-get source nginx
     ```
 
-5. Tambahkan Nginx ke PATH
+    install depedencies tambahan
     ```bash
-     echo 'export PATH=/usr/local/nginx/sbin:$PATH' >> ~/.bashrc
-     source ~/.bashrc
+    sudo apt-get pkg-dev build-essential
     ```
 
-6. Setelah itu cek konfigurasi.
+    download module brotli dari github:
     ```bash
-     sudo nginx -t
+    sudo git clone --recursive https://github.com/google/ngx_brotli.git
     ```
 
-7. Menambahkan module brotil.
+4. konfigurasi buid nginx.
+    
     ```bash
-    sudo git clone https://github.com/google/ngx_brotli.git
-    cd ngx_brotli
-    sudo git submodule update --init
-    cd ..
+    cd /usr/local/src/nginx-1.28.0/debian/rules
     ```
 
-8. Konfigurasi ulang nginx dengan modul Brotli.
+    tambahkan command pada bagian config.status.nginx dan config.status.nginx_debug pada barisan setelah /.configure:
+
     ```bash
-     ./configure --prefix=/usr/local/nginx -with-http_ssl_module -with-http_realip_module  --add-module=./ngx_brotli
+    --add-module=/usr/local/src/ngx_brotli
     ```
 
-9. Kompilasi dan install.
+5. Compile dan build nginx
+
     ```bash
-     make 
-     sudo make install
+    sudo dpgk-buildpackage -b -uc -us
     ```
 
-10. Konfigurasi nginx untuk menggunakan brotli.
+    cek hasil package:
     ```bash
-    sudo nano /usr/local/nginx/conf/nginx.conf
+    ls /usr/local/src/*.deb
     ```
 
-    Tambahkan konfigurasi berikut pada blok 'http'.
+    hasil:
+    ```bash
+    /usr/local/src/nginx_1.28.0-1~noble_amd64.deb
+    /usr/local/src/nginx-dbg_1.28.0-1~noble_amd64.deb
+    ```
+
+    install nginx:
+    ```bash 
+    sudo dpkg -i /user/local/serc/*.deb
+    ```
+
+6. konfigurasi modul brotli:
+
+    ```bash
+    sudo nano /etc/nginx/nginx.conf
+    ```
+
+    tambahkan command line pada bagian http{}:
     ```bash
     brotli on;
-    brotli_comp_level 6; 
-    brotli_types text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
+    brotli_comp_level 6;
+    brotli_static on;
+    brotli_types text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascript image/x-icon image/vnd.microsoft.icon image/bmp image/svg+xml;
     ```
 
-11. Restart nginx
+    cek sintaks nginx:
     ```bash
-    sudo nginx -s reload
+    sudo nginx -t
     ```
 
-12. Verifikasi Brotli berhasil atau tidak.
+    hidupkan nginx:
+    ```bash
+    sudo systemctl start nginx
+    ```
+
+7. buat self-signed SSL
+
+    ```bash
+    sudo openssl req -x509 -nodes -days 3652 -newkey rsa:2048 -keyout /etc/ssl/private/localhost.key -out /etc/ssl/certs/localhost.crt
+    ```
+
+8. konfigurasi nginx untuk ssl
+
+    ```bash
+    sudo nano /etc/nginx/conf.d/default.conf
+    ```
+
+    tambahkan command line bapada blok server:
+    ```bash
+    server {
+              listen       80;
+              listen       [::]:80;
+              server_name  _;
+              root         /usr/share/nginx/html;
+
+              index index.html index.htm;
+
+              location / {
+              try_files $uri $uri/ =404;
+          }
+          }
+          server {
+              listen 443 ssl;
+              server_name localhost;
+
+              ssl_certificate /etc/ssl/certs/localhost.crt;
+              ssl_certificate_key /etc/ssl/private/localhost.key;
+
+              root /usr/share/nginx/html;
+              index feb.html;
+          }
+    ```
+
+    cek sintaks: 
+    ```bash
+    sudo nginx -t
+    ```
+
+    reload nginx:
+    ```bash
+    sudo systemctl reload nginx
+    ```
+
+9. Verifikasi Brotli dan ssl berhasil atau tidak.
     ```bash
     curl -H "Accept-Encoding: br" -I http://localhost
     ```
@@ -274,93 +390,7 @@ Nginx adalah server web yang populer dan efisien. Dalam bagian ini, kita mengins
 
     pengujian brotli pada nginx.
 
-- Buat direktori web.
-    ```bash
-     sudo mkdir -p /usr/local/nginx/html
-     cd /usr/local/nginx/html
-     sudo nano index.html
-    ```
- ![baru](Gambar/gambar16.png)
-
-- Verifikasi brotli.
-    ```bash
-     curl -H "Accept-Encoding: br" -I http://localhost
-    ```
-    ![baru](Gambar/gambar17.png)
-    brotli berhasil mengkompresi file html.
-
-### 3 buat ssl certificate dengan self signed.
-
-Keamanan data yang ditransmisikan antara server dan klien sangat penting. Dengan membuat sertifikat SSL self-signed, kita dapat mengenkripsi komunikasi dan melindungi informasi sensitif. Konfigurasi SSL di Nginx memastikan bahwa semua data yang dikirimkan aman dan terlindungi dari penyadapan.
-
-- Kita buat SSL directory.
-    ```bash
-     cd /usr/local/nginx
-     sudo mkdir SSL
-    ```
-
-- Buat file infoemasi tentang SSL
-    ```bash
-     sudo nano self-info.txt
-     [req]
-     default_bits       = 2048
-     prompt      = no
-     default_keyfile    = localhost.key
-     distinguished_name = dn
-     req_extensions     = req_ext
-     x509_extensions    = v3_ca
-
-     [ dn ]
-     C = PH
-     ST = NCR
-     L = Manila
-     O = localhost
-     OU = Development
-     CN = localhost
-
-     [req_ext]
-     subjectAltName = @alt_names
-
-     [v3_ca]
-     subjectAltName = @alt_names
-
-     [alt_names]
-     DNS.1   = localhost
-     DNS.2   = 127.0.0.1
-    ```
-
-- Jalankan petintah OpenSSl.
-    ```bash 
-     sudo openssl req -x509 -nodes -days 3652 -new key rsa:2048 -keyout localhost.key -out localhost.crt -config ssl-info.txt
-    ```
-
-    Cek direktori ssl.
-    ![baru](Gambar/gambar18.png)
-
-
-- Buka konfigurasi nginx dan tambahkan printah beriku pada bagian server.
-    ```bash
-     sudo nano /usr/local/nginx/conf/nginx.conf
-
-     listen 443 ssl;
-     listen [::]:443 ssl;
-
-     ssl_certificate /usr/local/nginx/ssl/localhost.crt;
-     ssl_certificate_key /usr/local/nginx/ssl/localhost.key;
-
-     ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
-     ```
-
-- Kita izinkan port 80 dan 443 melalui firewall agar dapat diakses oleh  server.
-    ```bash
-     sudo ufw allow 80
-     sudo ufw allow 443
-    ```
-
-- Setelah itu restar nginx dengan perintah.
-    ```bash
-     sudo systemctl reload nginx
-    ```
+    ![baru](Gambar/gambar16.png)
 
 - Kita lihat tampilan web yang sudah kita buat.
     ![baru](Gambar/gambar19.png)
