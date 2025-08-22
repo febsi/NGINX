@@ -1,0 +1,4 @@
+# untuk restart dan reload service kalau ada perubahan.
+---
+- name: Reload nftables
+  ansible.builtin.command: nft -f /etc/nftables.conf

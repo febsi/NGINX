@@ -1,0 +1,24 @@
+---
+- name: Setup nftables firewall
+  hosts: all
+  become: true
+  roles:
+    - nftables
+
+- name: ganti port
+  hosts: all
+  become: true
+  roles:
+    - port
+
+- name: Setup Fail2ban
+  hosts: all
+  become: true
+  roles:
+    - fail2ban
+
+- name: nginx dengan module brotli dan ssl
+  hosts: all
+  become: true
+  roles:
+    - nginx

@@ -1,0 +1,52 @@
+---
+- name: Update daftar paket
+  ansible.builtin.apt:
+    update_cache: yes
+  when: ansible_pkg_mgr == "apt"
+
+- name: Install Fail2ban
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+  when: ansible_pkg_mgr == "apt"
+
+- name: Buat konfigurasi jail.local untuk Fail2ban
+  ansible.builtin.copy:
+    content: |
+      [DEFAULT]
+      bantime = {{ fail2ban_bantime }}
+      findtime = {{ fail2ban_findtime }}
+      maxretry = {{ fail2ban_maxretry }}
+
+      [sshd]
+      enabled = {{ fail2ban_sshd_enabled | bool | lower }}
+      port = ssh
+      logpath = %(sshd_log)s
+      backend = %(sshd_backend)s
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Fail2ban
+
+- name: Nonaktifkan autentikasi kata sandi SSH
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+  notify: Restart SSH
+
+- name: Nonaktifkan login root melalui SSH
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin'
+    line: 'PermitRootLogin no'
+    state: present
+  notify: Restart SSH
+
+- name: Pastikan service Fail2ban aktif dan berjalan
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: yes
+    state: started
