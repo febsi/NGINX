@@ -2,5 +2,6 @@
 # Port-port yang diizinkan lewat firewall
 nftables_allowed_ports:
   - 22    # SSH
-  - 80    # HTTP
-  - 443   # HTTPS
+
+  
+  

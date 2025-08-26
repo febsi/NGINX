@@ -1,10 +1,10 @@
 server {
-    listen       80;
-    listen       [::]:80;
-    server_name  _;
+    listen       {{ http_port | default(80) }};
+    listen       [::]:{{ http_port | default(80) }};
+    server_name  {{ server_name | default('_') }};
 
-    root         /usr/share/nginx/html;
-    index index.html index.htm;
+    root         {{ web_root | default('/usr/share/nginx/html') }};
+    index        {{ index_file | default('index.html') }};
 
     location / {
         try_files $uri $uri/ =404;
@@ -12,12 +12,12 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    server_name localhost;
+    listen       {{ https_port | default(443) }} ssl;
+    server_name  {{ server_name_ssl | default('localhost') }};
 
-    ssl_certificate {{ ssl_cert_path }};
+    ssl_certificate     {{ ssl_cert_path }};
     ssl_certificate_key {{ ssl_key_path }};
 
-    root /usr/share/nginx/html;
-    index index.html index.htm;
+    root         {{ web_root | default('/usr/share/nginx/html') }};
+    index        {{ index_file | default('index.html') }};
 }

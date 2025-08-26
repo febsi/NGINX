@@ -1,4 +1,8 @@
 ---
+nftables_allowed_ports:
+  - 80    # HTTP
+  - 443   # HTTPS
+  
 http_port: 80
 https_port: 443
 
@@ -16,5 +20,3 @@ ssl_key_path: /etc/nginx/ssl/key.pem
 ssl_cert_path: "/etc/ssl/certs/nginx-selfsigned.crt"
 ssl_key_path: "/etc/ssl/private/nginx-selfsigned.key"
 ssl_days_valid: "+365d"
-
-

@@ -1,2 +1,4 @@
 [linux]
-192.168.1.100 ansible_user=linux ansible_port=717 ansible_ssh_privet_key_file=~/.ssh/id_rsa
+feb1 ansible_host=192.168.1.100 ansible_user=linux ansible_port=717 ansible_ssh_privet_key_file=~/.ssh/id_rsa
+feb2 ansible_host=192.168.1.100 ansible_user=linux ansible_ssh_privet_key_file=~/.ssh/id_rsa
+feb3 ansible_host=192.168.1.100 ansible_user=linux ansible_ssh_privet_key_file=~/.ssh/id_rsa
