@@ -2,6 +2,5 @@
 # Port-port yang diizinkan lewat firewall
 nftables_allowed_ports:
   - 22    # SSH
-
   
   
