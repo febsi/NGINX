@@ -1,5 +1,5 @@
 ---
-- name: Setup nftables firewall
+- name: ansible roles
   hosts: all
   become: true
   roles:
