@@ -1,40 +1,25 @@
 ---
 - name: Install dependencies
   ansible.builtin.apt:
-    name:
-      - dpkg-dev
-      - git
-      - build-essential
-      - gnupg2
-      - gcc
-      - cmake
-      - libpcre3
-      - libpcre3-dev
-      - zlib1g
-      - zlib1g-dev
-      - libssl-dev
-      - openssl
-      - curl
-      - unzip
-      - libbrotli-dev
+    name: "{{ nginx_dependencies }}"
     state: present
     update_cache: yes
 
 - name: Tambahkan Nginx GPG key
   ansible.builtin.get_url:
-    url: https://nginx.org/keys/nginx_signing.key
+    url: "{{ nginx_gpg_key_url }}"
     dest: /etc/apt/trusted.gpg.d/nginx_signing.asc
     mode: '0644'
 
 - name: Tambahkan Repository Nginx
   ansible.builtin.apt_repository:
-    repo: "deb http://nginx.org/packages/ubuntu noble nginx"
+    repo: "deb http://nginx.org/packages/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} nginx"
     state: present
     filename: "nginx"
 
 - name: Tambahkan Repository Source Nginx
   ansible.builtin.apt_repository:
-    repo: "deb-src http://nginx.org/packages/ubuntu noble nginx"
+    repo: "deb-src http://nginx.org/packages/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} nginx"
     state: present
     filename: "nginx"
 
@@ -81,13 +66,13 @@
 
 - name: Tambahkan konfigurasi Brotli ke nginx.conf
   ansible.builtin.blockinfile:
-    path: /etc/nginx/nginx.conf
+    path: "{{ nginx_conf_path }}"
     insertafter: 'http {'
     block: |
       brotli on;
-      brotli_comp_level 6;
+      brotli_comp_level {{ brotli_level }};
       brotli_static on;
-      brotli_types text/plain text/css application/javascript application/x-javascript application/json image/svg+xml;
+      brotli_types {{ brotli_types | join(' ') }};
 
 - name: Generate private key
   community.crypto.openssl_privatekey:
@@ -104,10 +89,10 @@
 - name: Buat konfigurasi HTTPS default
   ansible.builtin.template:
     src: default.conf.j2
-    dest: /etc/nginx/conf.d/default.conf
+    dest: "{{ nginx_conf_d }}/default.conf"
 
 - name: Test konfigurasi nginx
-  ansible.builtin.command: nginx -t
+  ansible.builtin.command: "{{ nginx_bin }} -t"
   register: nginx_test
   ignore_errors: yes
 
@@ -128,7 +113,7 @@
   when: nginx_test.rc == 0
 
 - name: Cek Brotli dengan curl
-  ansible.builtin.command: "curl -k -H 'Accept-Encoding: br' -I https://localhost"
+  ansible.builtin.command: "curl -k -H 'Accept-Encoding: br' -I https://{{ nginx_test_host }}"
   register: curl_result
   ignore_errors: yes
 

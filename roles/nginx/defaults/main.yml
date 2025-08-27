@@ -1,20 +1,39 @@
----
-http_port: 80
-https_port: 443
+nginx_dependencies:
+  - dpkg-dev
+  - git
+  - build-essential
+  - gnupg2
+  - gcc
+  - cmake
+  - libpcre3
+  - libpcre3-dev
+  - zlib1g
+  - zlib1g-dev
+  - libssl-dev
+  - openssl
+  - curl
+  - unzip
+  - libbrotli-dev
 
-nginx_version: "1.28.0"
+nginx_gpg_key_url: "https://nginx.org/keys/nginx_signing.key"
 nginx_src_dir: "/usr/local/src"
+nginx_version: "1.26.2"   # contoh, bisa disesuaikan
+nginx_conf_path: "/etc/nginx/nginx.conf"
+nginx_conf_d: "/etc/nginx/conf.d"
+nginx_bin: "/usr/sbin/nginx"
+
 brotli_repo: "https://github.com/google/ngx_brotli.git"
+brotli_level: 6
+brotli_types:
+  - text/plain
+  - text/css
+  - application/javascript
+  - application/x-javascript
+  - application/json
+  - image/svg+xml
 
-web_root: /usr/share/nginx/html
-index_file: index.html
-server_name: example.com
-server_name_ssl: example.com
-
-ssl_cert_path: /etc/nginx/ssl/cert.pem
-ssl_key_path: /etc/nginx/ssl/key.pem
-ssl_cert_path: "/etc/ssl/certs/nginx-selfsigned.crt"
 ssl_key_path: "/etc/ssl/private/nginx-selfsigned.key"
+ssl_cert_path: "/etc/ssl/certs/nginx-selfsigned.crt"
 ssl_days_valid: "+365d"
 
-
+nginx_test_host: "localhost"
